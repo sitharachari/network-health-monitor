@@ -7,6 +7,8 @@ import sqlite3
 from datetime import datetime
 import smtplib
 from email.mime.text import MIMEText
+import schedule
+import time 
 
 
 
@@ -149,3 +151,27 @@ def daily_report():
     print("\n" + report)
     send_email("Daily Uptime Report", report)
 
+# ─────────────────────────────────────────
+# ENTRY POINT
+# ─────────────────────────────────────────
+if __name__ == "__main__":
+    print("Network Health Monitor starting...")
+
+    # Set up the database
+    init_db()
+
+    # Run an immediate check on startup
+    check_hosts()
+
+    # Schedule recurring checks
+    schedule.every(CHECK_INTERVAL).minutes.do(check_hosts)
+
+    # Schedule daily report
+    schedule.every().day.at(REPORT_TIME).do(daily_report)
+
+    print(f"\nMonitor running — checking every {CHECK_INTERVAL} minutes.")
+    print("Press Ctrl+C to stop.\n")
+
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
