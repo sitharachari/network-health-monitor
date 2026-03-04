@@ -2,6 +2,7 @@ from dotenv import load_dotenv
 import os
 import platform 
 import subprocess
+import csv
 
 load_dotenv()
 
@@ -25,3 +26,13 @@ def ping(address):
         stderr=subprocess.DEVNULL
     )
     return result.returncode == 0
+
+def load_hosts():
+    """Read hosts from hosts.csv and return as list of dicts."""
+    hosts = []
+    with open(HOSTS_FILE, newline="") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            hosts.append(row)
+    return hosts
+
