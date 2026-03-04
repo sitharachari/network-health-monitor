@@ -3,6 +3,9 @@ import os
 import platform 
 import subprocess
 import csv
+import sqlite3
+from datetime import datetime
+
 
 load_dotenv()
 
@@ -35,4 +38,33 @@ def load_hosts():
         for row in reader:
             hosts.append(row)
     return hosts
+
+def init_db():
+    """Create the logs table if it doesn't exist."""
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS logs (
+            id        INTEGER PRIMARY KEY AUTOINCREMENT,
+            name      TEXT,
+            address   TEXT,
+            status    TEXT,
+            timestamp TEXT
+        )
+    """)
+    conn.commit()
+    conn.close()
+
+
+def log_result(name, address, status):
+    """Insert a ping result into the database."""
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT INTO logs (name, address, status, timestamp) VALUES (?, ?, ?, ?)",
+        (name, address, status, datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    )
+    conn.commit()
+    conn.close()
+
 
