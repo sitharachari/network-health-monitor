@@ -97,3 +97,29 @@ def send_alert(name, address, status):
     )
     send_email(subject, body)
 
+# Tracks the last known status of each host so we only alert on changes
+previous_status = {}
+
+def check_hosts():
+    """Ping all hosts, log results, and send alerts on status changes."""
+    print(f"\n[{datetime.now().strftime('%H:%M:%S')}] Checking hosts...")
+    hosts = load_hosts()
+
+    for host in hosts:
+        name    = host["Name"]
+        address = host["Address"]
+        status  = "ONLINE" if ping(address) else "OFFLINE"
+
+        # Log every result to the database
+        log_result(name, address, status)
+
+        # Only send an alert if the status changed since last check
+        if name in previous_status and previous_status[name] != status:
+            send_alert(name, address, status)
+
+        previous_status[name] = status
+
+        # Colour-coded console output
+        colour = "\033[92m" if status == "ONLINE" else "\033[91m"  # green / red
+        reset  = "\033[0m"
+        print(f"  {colour}{status}{reset}  {name} ({address})")
