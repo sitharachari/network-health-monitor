@@ -123,3 +123,29 @@ def check_hosts():
         colour = "\033[92m" if status == "ONLINE" else "\033[91m"  # green / red
         reset  = "\033[0m"
         print(f"  {colour}{status}{reset}  {name} ({address})")
+
+def daily_report():
+    """Query the DB and email a summary of uptime percentages."""
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT
+            name,
+            address,
+            SUM(CASE WHEN status = 'ONLINE'  THEN 1 ELSE 0 END) AS up,
+            SUM(CASE WHEN status = 'OFFLINE' THEN 1 ELSE 0 END) AS down
+        FROM logs
+        GROUP BY name, address
+    """)
+    rows = cursor.fetchall()
+    conn.close()
+
+    report = "Daily Uptime Report\n" + "=" * 40 + "\n"
+    for name, address, up, down in rows:
+        total      = up + down
+        pct        = (up / total * 100) if total > 0 else 0
+        report    += f"{name} ({address}): {pct:.1f}% uptime  ({up} up / {down} down)\n"
+
+    print("\n" + report)
+    send_email("Daily Uptime Report", report)
+
