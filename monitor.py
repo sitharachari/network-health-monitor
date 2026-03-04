@@ -20,8 +20,8 @@ EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
 HOSTS_FILE     = "hosts.csv"
 DB_FILE        = "monitor.db"
 LOG_FILE       = "monitor.log"
-CHECK_INTERVAL = 5   # minutes between checks
-REPORT_TIME    = "08:00"  # time to send daily report
+CHECK_INTERVAL = 5   #minutes between checks
+REPORT_TIME    = "08:00"  #time to send daily report
 
 
 
@@ -99,7 +99,7 @@ def send_alert(name, address, status):
     )
     send_email(subject, body)
 
-# Tracks the last known status of each host so we only alert on changes
+# tracks the last known status of each host so we only alert on changes
 previous_status = {}
 
 def check_hosts():
@@ -112,16 +112,16 @@ def check_hosts():
         address = host["Address"]
         status  = "ONLINE" if ping(address) else "OFFLINE"
 
-        # Log every result to the database
+        # log every result to the database
         log_result(name, address, status)
 
-        # Only send an alert if the status changed since last check
+        #only send an alert if the status changed since last check
         if name in previous_status and previous_status[name] != status:
             send_alert(name, address, status)
 
         previous_status[name] = status
 
-        # Colour-coded console output
+        #colour coded console output
         colour = "\033[92m" if status == "ONLINE" else "\033[91m"  # green / red
         reset  = "\033[0m"
         print(f"  {colour}{status}{reset}  {name} ({address})")
@@ -157,16 +157,16 @@ def daily_report():
 if __name__ == "__main__":
     print("Network Health Monitor starting...")
 
-    # Set up the database
+    #set up the database
     init_db()
 
-    # Run an immediate check on startup
+    #run an immediate check on startup
     check_hosts()
 
-    # Schedule recurring checks
+    #schedule recurring checks
     schedule.every(CHECK_INTERVAL).minutes.do(check_hosts)
 
-    # Schedule daily report
+    #schedule daily report
     schedule.every().day.at(REPORT_TIME).do(daily_report)
 
     print(f"\nMonitor running — checking every {CHECK_INTERVAL} minutes.")
