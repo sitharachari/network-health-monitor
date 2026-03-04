@@ -5,6 +5,9 @@ import subprocess
 import csv
 import sqlite3
 from datetime import datetime
+import smtplib
+from email.mime.text import MIMEText
+
 
 
 load_dotenv()
@@ -67,4 +70,30 @@ def log_result(name, address, status):
     conn.commit()
     conn.close()
 
+def send_email(subject, body):
+    """Send an email alert via Gmail."""
+    try:
+        msg = MIMEText(body)
+        msg["Subject"] = subject
+        msg["From"]    = EMAIL_SENDER
+        msg["To"]      = EMAIL_RECEIVER
+
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+            server.login(EMAIL_SENDER, EMAIL_PASSWORD)
+            server.sendmail(EMAIL_SENDER, EMAIL_RECEIVER, msg.as_string())
+
+        print(f"  → Email sent: {subject}")
+    except Exception as e:
+        print(f"  → Email failed: {e}")
+
+
+def send_alert(name, address, status):
+    subject = f"[Monitor] ALERT: {name} is {status}"
+    body = (
+        f"Host:    {name}\n"
+        f"Address: {address}\n"
+        f"Status:  {status}\n"
+        f"Time:    {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+    )
+    send_email(subject, body)
 
