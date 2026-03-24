@@ -167,7 +167,7 @@ if __name__ == "__main__":
     schedule.every(CHECK_INTERVAL).minutes.do(check_hosts)
 
     #schedule daily report
-    schedule.every().day.at(REPORT_TIME).do(daily_report)
+    schedule.every(5).minutes.at(REPORT_TIME).do(daily_report)
 
     print(f"\nMonitor running — checking every {CHECK_INTERVAL} minutes.")
     print("Press Ctrl+C to stop.\n")
