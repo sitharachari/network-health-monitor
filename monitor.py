@@ -20,7 +20,7 @@ EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
 HOSTS_FILE     = "hosts.csv"
 DB_FILE        = "monitor.db"
 LOG_FILE       = "monitor.log"
-CHECK_INTERVAL = 5   #minutes between checks
+CHECK_INTERVAL = 1   #minutes between checks
 REPORT_TIME    = "08:00"  #time to send daily report
 
 
